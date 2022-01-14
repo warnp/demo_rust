@@ -59,7 +59,7 @@ fn main() {
         damage: 6
     };
 
-    let our_hero = Perso {
+    let mut our_hero = Perso {
         name: "Toto".to_string(),
         life: 100,
         inventory: vec![sword],
@@ -76,5 +76,5 @@ fn main() {
     println!("Attack : {}", our_hero.attack(&bad_guy));
     println!("Attack : {}", bad_guy.attack(&our_hero));
     println!("{} equip a weapon", our_hero.name);
-    our_hero.equipped_item = &our_hero.inventory.get(0);
+    our_hero.equipped_item = our_hero.inventory.get(0);
 }
