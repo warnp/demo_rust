@@ -74,4 +74,7 @@ fn main() {
 
     println!("Hello, {our_hero:?}");
     println!("Attack : {}", our_hero.attack(&bad_guy));
+    println!("Attack : {}", bad_guy.attack(&our_hero));
+    println!("{} equip a weapon", our_hero.name);
+    our_hero.equipped_item = &our_hero.inventory.get(0);
 }
