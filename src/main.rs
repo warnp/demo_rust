@@ -28,6 +28,11 @@ fn main() {
         damage: 5
     };
 
+    let axe = Item {
+        name: "Big Axe".to_string(),
+        damage: 6
+    };
+
     let our_hero = Perso {
         name: "Toto".to_string(),
         life: 100,
@@ -37,7 +42,7 @@ fn main() {
     let bad_guy = BadGuy {
         name: "Biff".to_string(),
         life: 100,
-        equipped_item: sword,
+        equipped_item: axe,
     };
 
     println!("Hello, {our_hero:?}");
