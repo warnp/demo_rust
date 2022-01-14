@@ -1,3 +1,7 @@
+trait Actor {
+     fn attack(&self, target: &Actor) -> bool;
+}
+
 #[derive(Debug)]
 struct Item {
     name: String,
