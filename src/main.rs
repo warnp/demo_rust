@@ -1,25 +1,51 @@
 trait Actor {
-     fn attack(&self, target: &dyn Actor) -> bool;
+    fn attack(&self, target: &dyn Actor) -> bool;
+    fn get_name(&self) -> &str;
 }
 
 #[derive(Debug)]
 struct Item {
-    name: String,
-    damage: i32
+    pub name: String,
+    pub damage: i32
 }
 
 #[derive(Debug)]
-struct Perso {
-    name: String,
-    life: i32,
-    inventory: Vec<Item>
+struct Perso<'a> {
+    pub name: String,
+    pub life: i32,
+    pub inventory: Vec<Item>,
+    pub equipped_item: Option<&'a Item>
 }
+
+impl<'a> Actor for Perso<'a > {
+    fn attack(&self, target: & dyn Actor) -> bool {
+        println!("{} attack {} with his/her {}", self.name, target.get_name(), self.equipped_item.map_or_else(|| "pas d'arme", |i| &i.name));
+        true
+    }
+
+    fn get_name(&self) -> &str {
+        &self.name
+    }
+}
+
+
 
 #[derive(Debug)]
 struct BadGuy {
-    name: String,
-    life: i32,
-    equipped_item: Item
+    pub name: String,
+    pub life: i32,
+    pub equipped_item: Item
+}
+
+impl Actor for BadGuy {
+    fn attack(&self, target: & dyn Actor) -> bool {
+        println!("{} attack {} with his/her {}", self.name, target.get_name(), self.equipped_item.name);
+        true
+    }
+
+    fn get_name(&self) -> &str {
+        &self.name
+    }
 }
 
 fn main() {
@@ -36,7 +62,8 @@ fn main() {
     let our_hero = Perso {
         name: "Toto".to_string(),
         life: 100,
-        inventory: vec![sword]
+        inventory: vec![sword],
+        equipped_item: None
     };
 
     let bad_guy = BadGuy {
@@ -46,4 +73,5 @@ fn main() {
     };
 
     println!("Hello, {our_hero:?}");
+    println!("Attack : {}", our_hero.attack(&bad_guy));
 }
