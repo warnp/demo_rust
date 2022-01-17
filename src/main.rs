@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, write};
 
 trait Actor {
-    fn attack(&self, target: &mut dyn Actor) -> bool;
+    fn attack(&self, target: &mut dyn Actor) -> Result<i32, LifeError>;
     fn get_name(&self) -> &str;
     fn get_damage(&mut self, damage_amount: i32) -> Result<i32, LifeError>;
 }
@@ -10,7 +10,7 @@ trait Actor {
 #[derive(Debug, Clone)]
 struct Item {
     pub name: String,
-    pub damage: i32
+    pub damage: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -18,21 +18,17 @@ struct Perso<'a> {
     pub name: String,
     pub life: i32,
     pub inventory: Vec<Item>,
-    pub equipped_item: Option<&'a Item>
+    pub equipped_item: Option<&'a Item>,
 }
 
-impl<'a> Actor for Perso<'a > {
-    fn attack(&self, target: &mut dyn Actor) -> bool {
+impl<'a> Actor for Perso<'a> {
+    fn attack(&self, target: &mut dyn Actor) -> Result<i32, LifeError> {
         println!("{} attack {} with his/her {}", self.name, target.get_name(), self.equipped_item.map_or_else(|| "pas d'arme", |i| &i.name));
         //Gestion des optional
         if let Some(damage) = self.equipped_item {
-            let target_life = target.get_damage(damage.damage);
-            match target_life {
-                Ok(r) => println!("{} have {:?} PVs remaining", target.get_name(), target_life),
-                Err(r) => println!("{} is dead", target.get_name()),
-            }
+            return target.get_damage(damage.damage);
         }
-        true
+        Ok(0)
     }
 
     fn get_name(&self) -> &str {
@@ -45,18 +41,17 @@ impl<'a> Actor for Perso<'a > {
 }
 
 
-
 #[derive(Debug, Clone)]
 struct BadGuy {
     pub name: String,
     pub life: i32,
-    pub equipped_item: Item
+    pub equipped_item: Item,
 }
 
 impl Actor for BadGuy {
-    fn attack(&self, target: &mut dyn Actor) -> bool {
+    fn attack(&self, target: &mut dyn Actor) -> Result<i32, LifeError> {
         println!("{} attack {} with his/her {}", self.name, target.get_name(), self.equipped_item.name);
-        true
+        Ok(0)
     }
 
     fn get_name(&self) -> &str {
@@ -68,7 +63,7 @@ impl Actor for BadGuy {
         if self.life > 0 {
             return Ok(self.life);
         }
-        Err(LifeError{})
+        Err(LifeError {})
     }
 }
 
@@ -81,26 +76,24 @@ impl Display for LifeError {
     }
 }
 
-impl Error for LifeError {
-
-}
+impl Error for LifeError {}
 
 fn main() {
     let sword = Item {
         name: "Big sword".to_string(),
-        damage: 5
+        damage: 5,
     };
 
     let axe = Item {
         name: "Big Axe".to_string(),
-        damage: 6
+        damage: 6,
     };
 
     let mut our_hero = Perso {
         name: "Toto".to_string(),
         life: 100,
         inventory: vec![sword],
-        equipped_item: None
+        equipped_item: None,
     };
 
     let mut bad_guy = BadGuy {
@@ -116,9 +109,17 @@ fn main() {
     // time error, it's possible to use Rc or any other smartpointer option to do the same
     let hero_copy = our_hero.clone();
     our_hero.equipped_item = hero_copy.inventory.get(0);
-    loop {
-        println!("Attack : {}", our_hero.attack(&mut bad_guy));
-        println!("Attack : {}", bad_guy.attack(&mut our_hero));
-    }
 
+    loop {
+        let our_hero_attack_result = our_hero.attack(&mut bad_guy);
+        let bad_guy_attack_result = bad_guy.attack(&mut our_hero);
+
+        match our_hero_attack_result {
+            Ok(r) => println!("bad guy have {:?} PVs remaining", r),
+            Err(r) => {
+                println!("bad guy is dead");
+                break
+            }
+        }
+    }
 }
