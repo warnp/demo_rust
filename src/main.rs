@@ -1,5 +1,7 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter, write};
+use futures::executor::block_on;
+use futures::join;
 
 trait Actor {
     fn attack(&self, target: &mut dyn Actor) -> Result<i32, LifeError>;
@@ -78,6 +80,7 @@ impl Display for LifeError {
 
 impl Error for LifeError {}
 
+
 fn main() {
     let sword = Item {
         name: "Big sword".to_string(),
@@ -110,6 +113,25 @@ fn main() {
     let hero_copy = our_hero.clone();
     our_hero.equipped_item = hero_copy.inventory.get(0);
 
+    block_on(async {
+        // for i in 0..100 {
+            join!(combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()),
+        combat_loop(our_hero.clone(), bad_guy.clone()));
+        // }
+    });
+}
+
+async fn combat_loop<'a>(mut our_hero: Perso<'a>, mut bad_guy: BadGuy) -> () {
     loop {
         let our_hero_attack_result = our_hero.attack(&mut bad_guy);
         let bad_guy_attack_result = bad_guy.attack(&mut our_hero);
@@ -121,5 +143,8 @@ fn main() {
                 break
             }
         }
+
+
     }
+    ()
 }
